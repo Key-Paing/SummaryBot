@@ -1,7 +1,5 @@
 import streamlit as st
 
-
-
 # for VectorStorage (Chromadb)
 from langchain.vectorstores import Chroma
 
@@ -21,7 +19,7 @@ from google.auth import default
 
 #Necessary for (Chunking and Embedding)
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 
 # for Groq-Cloud
@@ -34,8 +32,9 @@ import json
 import tempfile
 load_dotenv()
 
-groq_api_key = os.getenv("GROQ_API_KEY")
-project_id = os.getenv("PROJECT_ID")
+# Use Streamlit secrets (on cloud) or fallback to environment variables (for local dev)
+groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
 
 #For Google Cloud
 # key_path = 'machine-translation-001-d581be037dd3.json'
