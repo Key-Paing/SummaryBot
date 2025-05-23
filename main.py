@@ -1,8 +1,6 @@
 import streamlit as st
 
-#Necessary for (Chunking and Embedding)
-from langchain_experimental.text_splitter import SemanticChunker
-from langchain.embeddings import HuggingFaceEmbeddings
+
 
 # for VectorStorage (Chromadb)
 from langchain.vectorstores import Chroma
@@ -21,6 +19,10 @@ from langchain_core.output_parsers import StrOutputParser
 from google.oauth2.service_account import Credentials
 from google.auth import default
 
+#Necessary for (Chunking and Embedding)
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain.embeddings import HuggingFaceEmbeddings
+
 
 # for Groq-Cloud
 from langchain_groq import ChatGroq
@@ -28,13 +30,21 @@ from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
 import os
+import json
+import tempfile
 load_dotenv()
 
 groq_api_key = os.getenv("GROQ_API_KEY")
 project_id = os.getenv("PROJECT_ID")
 
 #For Google Cloud
-key_path = 'machine-translation-001-d581be037dd3.json'
+# key_path = 'machine-translation-001-d581be037dd3.json'
+service_account_info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+
+# Write to a temporary file
+with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+    json.dump(service_account_info, f)
+    key_path = f.name
 
 # Create credentials
 credentials = Credentials.from_service_account_file(
