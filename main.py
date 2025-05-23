@@ -39,7 +39,11 @@ project_id = os.getenv("PROJECT_ID")
 
 #For Google Cloud
 # key_path = 'machine-translation-001-d581be037dd3.json'
-service_account_info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+# service_account_info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+
+raw = st.secrets["google"]["credentials"]
+
+service_account_info = json.loads(raw)
 
 
 # Create credentials
