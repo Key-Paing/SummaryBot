@@ -1,0 +1,10 @@
+streamlit
+langchain
+langchain-experimental
+sentence-transformers
+chromadb
+langchain-google-vertexai
+google-cloud-aiplatform
+google-auth
+langchain-groq
+python-dot
