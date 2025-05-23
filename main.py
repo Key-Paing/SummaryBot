@@ -39,21 +39,6 @@ project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
 
 # os.environ['HUGGINGFACEHUB_API_TOKEN'] = st.secrets.get["HUGGINGFACEHUB_API_TOKEN"]
 
-class HFInferenceAPIEmbeddings:
-    def __init__(self, model_name, hf_token):
-        self.api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{model_name}"
-        self.headers = {"Authorization": f"Bearer {hf_token}"}
-
-    def embed_documents(self, texts):
-        return [self._embed(text) for text in texts]
-
-    def embed_query(self, text):
-        return self._embed(text)
-
-    def _embed(self, text):
-        response = requests.post(self.api_url, headers=self.headers, json={"inputs": text})
-        response.raise_for_status()
-        return response.json()[0]
 
 # Get your token securely from Streamlit secrets
 hf_token = st.secrets["HUGGINGFACE_TOKEN"]["token"]
@@ -111,11 +96,8 @@ with col1:
         if case_selection and not st.session_state.get(f"embedding_done_{case_selection}", False):
             @st.cache_resource
             def load_embedding_model():
-                # return HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-large-instruct")
-                return HFInferenceAPIEmbeddings(
-                        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-                        hf_token=hf_token
-                    )
+                return HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+                
 
             embedding = load_embedding_model()
             text = case_details[case_selection]
