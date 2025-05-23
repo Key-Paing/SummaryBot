@@ -42,17 +42,17 @@ project_id = os.getenv("PROJECT_ID")
 service_account_info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
 
 # Write to a temporary file
-with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-    json.dump(service_account_info, f)
-    key_path = f.name
+# with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+#     json.dump(service_account_info, f)
+#     key_path = f.name
 
 # Create credentials
 credentials = Credentials.from_service_account_file(
-    key_path,
+    service_account_info,
     scopes=['https://www.googleapis.com/auth/cloud-platform']
 )
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_path
 
 
 st.header("Models Result Comparison")
