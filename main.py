@@ -154,6 +154,7 @@ with col1:
                 project = "machine-translation-001",
                 location = "us-central1",
                 model = model_name,
+                credentials=credentials, 
                 model_kwargs={
                         "temperature": 0.6,
                         "max_length": 500,
