@@ -42,8 +42,11 @@ import requests
 load_dotenv()
 
 # Use Streamlit secrets (on cloud) or fallback to environment variables (for local dev)
-groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
-project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
+# groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+# project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
+
+groq_api_key = st.secrets["GROQ_API_KEY"]
+project_id = st.secrets["PROJECT_ID"]
 
 # os.environ['HUGGINGFACEHUB_API_TOKEN'] = st.secrets.get["HUGGINGFACEHUB_API_TOKEN"]
 
