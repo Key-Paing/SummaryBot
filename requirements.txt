@@ -2,7 +2,7 @@ streamlit==1.30.0
 langchain
 langchain-experimental
 sentence-transformers
-chromadb
+faiss-cpu
 langchain-google-vertexai
 google-cloud-aiplatform==1.55.0
 google-auth
