@@ -8,4 +8,5 @@ google-cloud-aiplatform==1.55.0
 google-auth
 langchain-groq
 langchain-huggingface
+python-dotenv
 protobuf==3.20.3
