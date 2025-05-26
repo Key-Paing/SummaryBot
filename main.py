@@ -104,7 +104,7 @@ with col1:
         if case_selection and not st.session_state.get(f"embedding_done_{case_selection}", False):
             @st.cache_resource
             def load_embedding_model():
-                return HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+                return HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",huggingfacehub_api_token=hf_token)
                 
 
             embedding = load_embedding_model()
