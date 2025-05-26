@@ -139,7 +139,10 @@ with col1:
             key="model_selection"
         )
 
-        
+        #Load from secrets
+        project_id = st.secrets["project_id"]
+        region = st.secrets["region"]
+
 
         def load_gemini_model(model_selection):
             
@@ -160,7 +163,7 @@ with col1:
             
             return VertexAI(
                 project = project_id,
-                location = "us-central1",
+                location = region,
                 model = model_name,
                 model_kwargs={
                         "temperature": 0.6,
