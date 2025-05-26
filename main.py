@@ -46,7 +46,7 @@ load_dotenv()
 # project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
 
 groq_api_key = st.secrets["GROQ_API_KEY"]
-project_id = st.secrets["PROJECT_ID"]
+# project_id = st.secrets["PROJECT_ID"]
 
 # os.environ['HUGGINGFACEHUB_API_TOKEN'] = st.secrets.get["HUGGINGFACEHUB_API_TOKEN"]
 
@@ -55,13 +55,11 @@ project_id = st.secrets["PROJECT_ID"]
 hf_token = st.secrets["HUGGINGFACE_TOKEN"]
 
 
-#For Google Cloud
-# key_path = 'machine-translation-001-d581be037dd3.json'
-# service_account_info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
-
 raw = st.secrets["google"]["credentials"]
 
 service_account_info = json.loads(raw)
+
+project_id = service_account_info.get("project_id")
 
 
 # Create credentials
