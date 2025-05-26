@@ -41,14 +41,7 @@ import tempfile
 import requests
 load_dotenv()
 
-# Use Streamlit secrets (on cloud) or fallback to environment variables (for local dev)
-# groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
-# project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
-
 groq_api_key = st.secrets["GROQ_API_KEY"]
-# project_id = st.secrets["PROJECT_ID"]
-
-# os.environ['HUGGINGFACEHUB_API_TOKEN'] = st.secrets.get["HUGGINGFACEHUB_API_TOKEN"]
 
 
 # Get your token securely from Streamlit secrets
@@ -59,7 +52,6 @@ raw = st.secrets["google"]["credentials"]
 
 service_account_info = json.loads(raw)
 
-project_id = service_account_info.get("project_id")
 
 
 # Create credentials
@@ -140,10 +132,6 @@ with col1:
             key="model_selection"
         )
 
-        #Load from secrets
-        project_id = st.secrets["project_id"]
-        region = st.secrets["region"]
-
 
         def load_gemini_model(model_selection):
             
@@ -163,8 +151,8 @@ with col1:
                 )
             
             return VertexAI(
-                project = project_id,
-                location = region,
+                project = "machine-translation-001",
+                location = "us-central1",
                 model = model_name,
                 model_kwargs={
                         "temperature": 0.6,
