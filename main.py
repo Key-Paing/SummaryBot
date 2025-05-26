@@ -49,7 +49,7 @@ project_id = st.secrets.get("PROJECT_ID", os.getenv("PROJECT_ID"))
 
 
 # Get your token securely from Streamlit secrets
-hf_token = st.secrets["HUGGINGFACE_TOKEN"]["token"]
+hf_token = st.secrets["HUGGINGFACE_TOKEN"]
 
 
 #For Google Cloud
