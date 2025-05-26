@@ -1,7 +1,8 @@
 import streamlit as st
 
 # for VectorStorage (Chromadb)
-from langchain.vectorstores import Chroma
+# from langchain.vectorstores import Chroma (Since this is deprecated)
+from langchain_community.vectorstores import Chroma
 
 # for Prompting
 from langchain_core.prompts import ChatPromptTemplate
