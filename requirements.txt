@@ -4,8 +4,8 @@ langchain-experimental
 sentence-transformers
 chromadb
 langchain-google-vertexai
-google-cloud-aiplatform
+google-cloud-aiplatform==1.55.0
 google-auth
 langchain-groq
 langchain-huggingface
-protobuf==3.20.1
+protobuf==3.19.5
