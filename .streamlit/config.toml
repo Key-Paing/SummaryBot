@@ -1,0 +1,5 @@
+[server]
+headless = true
+
+[runner]
+environ = { PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION = "python" }
