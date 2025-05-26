@@ -2,7 +2,14 @@ import streamlit as st
 
 # for VectorStorage (Chromadb)
 # from langchain.vectorstores import Chroma (Since this is deprecated)
-from langchain_community.vectorstores import Chroma
+#Error occuring of using Chroma during Deploying on Streamlit cloud
+# from langchain_community.vectorstores import Chroma
+
+#Instead
+#Will try with FAISS
+from langchain.vectorstores import FAISS
+
+
 
 # for Prompting
 from langchain_core.prompts import ChatPromptTemplate
@@ -110,7 +117,7 @@ with col1:
 
                 st.session_state[f"chunks_{case_selection}"] = semantic_chunks
 
-                vectorstore = Chroma.from_documents(documents=semantic_chunks, embedding=embedding)
+                vectorstore = FAISS.from_documents(documents=semantic_chunks, embedding=embedding)
                 semantic_chunk_retriever = vectorstore.as_retriever(search_kwargs={"k": 1})
 
                 # Store in session_state
