@@ -138,7 +138,7 @@ with col1:
             model_name = {
                 "Gemini 2.5 Flash": "gemini-2.5-flash-preview-04-17",
                 "Gemini 2.5 Pro": "gemini-2.5-pro-preview-05-06",
-                "Gemini 1.5 Pro": "gemini-1.5-pro",
+                "Gemini 1.5 Pro": "google/gemini-1.5-pro-002",
             }.get(model_selection)
 
             model_name_fromGroq = {
