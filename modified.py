@@ -253,7 +253,12 @@ if case_selection and model_selection and user_custom_prompt:
                 progress_bar.progress(50)
                 
                 # Generate summary ONLY ONCE
-                summary = rag_chain.invoke("Summarize")
+                # summary = rag_chain.invoke("Summarize")
+                summary = rag_chain.invoke({
+                    "context": context_text,
+                    "question": "Summarize"
+                })
+
                 
                 status_text.text("Calculating costs...")
                 progress_bar.progress(75)
