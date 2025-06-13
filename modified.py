@@ -73,7 +73,6 @@ MODEL_PRICING = {
 }
 
 #For Pricing
-@st.cache_data
 def count_tokens(text, model_type):
     if model_type == "gemini":
         return len(text.split())*1.3
