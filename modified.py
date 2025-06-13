@@ -177,7 +177,7 @@ with col1:
                         "temperature": 0.6,
                         "max_length": 500,
                         "top_p": 0.95,
-                        "top_k": 3,
+                        "top_k": 1,
                     },
 
             )
