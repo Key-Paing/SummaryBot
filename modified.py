@@ -221,14 +221,14 @@ with col2:
 if case_selection and model_selection and user_custom_prompt:
     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
 
-    # Manually retrieve context once
-    retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
-    context_text = "\n".join([doc.page_content for doc in retrieved_docs])
-    full_input = f"{context_text}\n{user_custom_prompt}"
+    # # Manually retrieve context once
+    # retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
+    # context_text = "\n".join([doc.page_content for doc in retrieved_docs])
+    # full_input = f"{context_text}\n{user_custom_prompt}"
 
    
     rag_chain = (
-         {"context": lambda _: context_text, "question": RunnablePassthrough() }
+         {"context": semantic_chunk_retriever, "question": RunnablePassthrough() }
          | prompt
          | llm
          | StrOutputParser()
