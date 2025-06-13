@@ -275,7 +275,7 @@ if case_selection and model_selection and user_custom_prompt:
             st.write("- Network connectivity issues")
             st.write("- Streamlit Cloud resource limitations")
             st.write("- Large input text causing memory issues")
-            return
+            st.stop()
         
         finally:
             # Clean up progress indicators
