@@ -73,6 +73,7 @@ MODEL_PRICING = {
 }
 
 #For Pricing
+@st.cache_data
 def count_tokens(text, model_type):
     if model_type == "gemini":
         return len(text.split())*1.3
@@ -229,36 +230,61 @@ if case_selection and model_selection and user_custom_prompt:
          | StrOutputParser()
     )
 
-    if st.button("Summarize"):
-        with st.spinner("Summarizing...."):
-
-            #For Pricing
-            retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
-            context_text = "\n".join([doc.page_content for doc in retrieved_docs])
-            
-            # Estimate input tokens (context + prompt)
-            full_input = f"{context_text}\n{user_custom_prompt}"
-            input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
-            
-            # Get summary
-            summary = rag_chain.invoke("Summarize")
-            
-            # Estimate output tokens
-            output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
-            
-            # Calculate costs for the selected model
-            input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
-
-
-            #Original <Start>
-            # summary = rag_chain.invoke("Summarize")
-            # <End>
+    if st.button("Summarize", type="primary"):
+        
+        # Add progress tracking
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        try:
+            with st.spinner("Summarizing..."):
+                
+                status_text.text("Retrieving relevant context...")
+                progress_bar.progress(25)
+                
+                # Get context ONCE - more efficient
+                retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
+                context_text = "\n".join([doc.page_content for doc in retrieved_docs])
+                
+                # Estimate input tokens
+                full_input = f"{context_text}\n{user_custom_prompt}"
+                input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
+                
+                status_text.text("Generating summary...")
+                progress_bar.progress(50)
+                
+                # Generate summary ONLY ONCE
+                summary = rag_chain.invoke("Summarize")
+                
+                status_text.text("Calculating costs...")
+                progress_bar.progress(75)
+                
+                # Estimate output tokens
+                output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
+                
+                # Calculate costs
+                input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
+                
+                progress_bar.progress(100)
+                status_text.text("Complete!")
+                
+        except Exception as e:
+            st.error(f"Error during summarization: {str(e)}")
+            st.info("This might be due to:")
+            st.write("- API timeout or rate limits")
+            st.write("- Network connectivity issues")
+            st.write("- Streamlit Cloud resource limitations")
+            st.write("- Large input text causing memory issues")
+            return
+        
+        finally:
+            # Clean up progress indicators
+            progress_bar.empty()
+            status_text.empty()
 
         st.subheader("Summarized Result:")
         st.write(summary)    
 
-
-        #For Pricing
         # Display token usage and cost for current query
         st.subheader("📈 Current Query Usage")
         col_tokens, col_cost = st.columns(2)
