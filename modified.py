@@ -201,19 +201,19 @@ with col2:
 
     #For Pricing
          # Token usage and cost tracking section
-    if 'total_usage' not in st.session_state:
-        st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
+    # if 'total_usage' not in st.session_state:
+    #     st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
     
-    if st.session_state.total_usage['input_tokens'] > 0 or st.session_state.total_usage['output_tokens'] > 0:
-        st.subheader("📊 Session Usage Summary")
-        st.write(f"**Total Input Tokens:** {st.session_state.total_usage['input_tokens']:,}")
-        st.write(f"**Total Output Tokens:** {st.session_state.total_usage['output_tokens']:,}")
-        st.write(f"**Total Tokens:** {st.session_state.total_usage['input_tokens'] + st.session_state.total_usage['output_tokens']:,}")
-        st.write(f"**Total Cost:** ${st.session_state.total_usage['total_cost']:.6f}")
+    # if st.session_state.total_usage['input_tokens'] > 0 or st.session_state.total_usage['output_tokens'] > 0:
+    #     st.subheader("📊 Session Usage Summary")
+    #     st.write(f"**Total Input Tokens:** {st.session_state.total_usage['input_tokens']:,}")
+    #     st.write(f"**Total Output Tokens:** {st.session_state.total_usage['output_tokens']:,}")
+    #     st.write(f"**Total Tokens:** {st.session_state.total_usage['input_tokens'] + st.session_state.total_usage['output_tokens']:,}")
+    #     st.write(f"**Total Cost:** ${st.session_state.total_usage['total_cost']:.6f}")
         
-        if st.button("Clear Session History"):
-            st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
-            st.rerun()
+    #     if st.button("Clear Session History"):
+    #         st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
+    #         st.rerun()
 
         #End
 
