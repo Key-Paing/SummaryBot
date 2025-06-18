@@ -10,3 +10,4 @@ langchain-groq
 langchain-huggingface
 python-dotenv
 protobuf==3.20.3
+google-genai>=1.0.0
