@@ -63,34 +63,13 @@ case_details = {
 # Create two columns
 col1, col2 = st.columns(2)
 
-#For Pricing
-MODEL_PRICING = {
-    "Gemini 2.5 Pro": {"input": 1.25, "output": 5.00},
-    "Gemini 2.5 Flash": {"input": 0.075, "output": 0.30},
-    "Llama 4": {"input": 0.59, "output": 0.79},  # Groq pricing
-    "Gemini 2.0 Flash-lite": {"input": 0.075, "output": 0.30},
-    "Gemini 2.0 Flash": {"input": 0.075, "output": 0.30}
-}
 
-#For Pricing
 def count_tokens(text, model_type):
     if model_type == "gemini":
         return len(text.split())*1.3
     else:
         return len(text.split()) *1.25
 
-#For Pricing
-def calculate_cost(input_tokens, output_tokens, model_name):
-    """Calculate cost based on token usage and model pricing"""
-    if model_name not in MODEL_PRICING:
-        return 0.0, 0.0, 0.0
-    
-    pricing = MODEL_PRICING[model_name]
-    input_cost = (input_tokens / 1_000_000) * pricing["input"]
-    output_cost = (output_tokens / 1_000_000) * pricing["output"]
-    total_cost = input_cost + output_cost
-    
-    return input_cost, output_cost, total_cost
 
 
 with col1:
@@ -199,32 +178,11 @@ with col2:
         st.success("Prompt is ready to feed into the Model!")
 
 
-    #For Pricing
-         # Token usage and cost tracking section
-    # if 'total_usage' not in st.session_state:
-    #     st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
-    
-    # if st.session_state.total_usage['input_tokens'] > 0 or st.session_state.total_usage['output_tokens'] > 0:
-    #     st.subheader("📊 Session Usage Summary")
-    #     st.write(f"**Total Input Tokens:** {st.session_state.total_usage['input_tokens']:,}")
-    #     st.write(f"**Total Output Tokens:** {st.session_state.total_usage['output_tokens']:,}")
-    #     st.write(f"**Total Tokens:** {st.session_state.total_usage['input_tokens'] + st.session_state.total_usage['output_tokens']:,}")
-    #     st.write(f"**Total Cost:** ${st.session_state.total_usage['total_cost']:.6f}")
-        
-    #     if st.button("Clear Session History"):
-    #         st.session_state.total_usage = {'input_tokens': 0, 'output_tokens': 0, 'total_cost': 0.0}
-    #         st.rerun()
-
-        #End
-
-
 if case_selection and model_selection and user_custom_prompt:
     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
 
-    # # Manually retrieve context once
-    # retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
-    # context_text = "\n".join([doc.page_content for doc in retrieved_docs])
-    # full_input = f"{context_text}\n{user_custom_prompt}"
+    full_input = case_details[case_selection] + "\n\n" + user_custom_prompt
+
 
    
     rag_chain = (
@@ -235,7 +193,7 @@ if case_selection and model_selection and user_custom_prompt:
     )
 
     # BUTTON 1: Summarize only
-    if st.button("Summarize", type="primary"):
+    if st.button("Summarize"):
         try:
             with st.spinner("Generating summary..."):
                 summary = rag_chain.invoke("Summarize")
@@ -245,110 +203,50 @@ if case_selection and model_selection and user_custom_prompt:
         except Exception as e:
             st.error(f"Error during summarization: {str(e)}")
 
-    # BUTTON 2: Estimate cost only
-    if st.button("Estimate Token Usage and Cost 💰"):
+    # BUTTON: Token Usage Only
+    if st.button("Estimate Tokens Usage"):
         try:
             summary = st.session_state.get("generated_summary", "[SUMMARY NOT GENERATED]")
+            
+            # Estimate input and output tokens
             input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
             output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
-            input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
 
-            st.subheader("📈 Estimated Usage and Cost")
-            col_tokens, col_cost = st.columns(2)
+            # Display token metrics
+            st.subheader("📊 Estimated Token Usage")
+            col_tokens = st.columns(3)
+            col_tokens[0].metric("Input Tokens", f"{input_tokens:,}")
+            col_tokens[1].metric("Output Tokens", f"{output_tokens:,}")
+            col_tokens[2].metric("Total Tokens", f"{input_tokens + output_tokens:,}")
 
-            with col_tokens:
-                st.metric("Input Tokens", f"{int(input_tokens):,}")
-                st.metric("Output Tokens", f"{int(output_tokens):,}")
-                st.metric("Total Tokens", f"{int(input_tokens + output_tokens):,}")
-
-            with col_cost:
-                st.metric("Input Cost", f"${input_cost:.6f}")
-                st.metric("Output Cost", f"${output_cost:.6f}")
-                st.metric("Total Cost", f"${total_cost:.6f}")
-
-            # Update session total
-            st.session_state.total_usage['input_tokens'] += int(input_tokens)
-            st.session_state.total_usage['output_tokens'] += int(output_tokens)
-            st.session_state.total_usage['total_cost'] += total_cost
+            # Optional: Track in session if needed
+            st.session_state.total_usage['input_tokens'] += input_tokens
+            st.session_state.total_usage['output_tokens'] += output_tokens
 
         except Exception as e:
-            st.error(f"Cost estimation error: {str(e)}")
+            st.error(f"Token estimation error: {str(e)}")
 
-    # if st.button("Summarize", type="primary"):
-        
-    #     # Add progress tracking
-    #     progress_bar = st.progress(0)
-    #     status_text = st.empty()
-        
+
+    # # BUTTON 2: Estimate cost only
+    # if st.button("Estimate Token Usage and Cost 💰"):
     #     try:
-    #         with st.spinner("Summarizing..."):
-                
-    #             status_text.text("Retrieving relevant context...")
-    #             progress_bar.progress(25)
-                
-    #             # Get context ONCE - more efficient
-    #             retrieved_docs = semantic_chunk_retriever.get_relevant_documents("Summarize")
-    #             context_text = "\n".join([doc.page_content for doc in retrieved_docs])
-                
-    #             # Estimate input tokens
-    #             full_input = f"{context_text}\n{user_custom_prompt}"
-    #             input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
-                
-    #             status_text.text("Generating summary...")
-    #             progress_bar.progress(50)
-                
-    #             # Generate summary ONLY ONCE
-    #             summary = rag_chain.invoke("Summarize")
-    #             # summary = rag_chain.invoke({
-    #             #     "context": context_text,
-    #             #     "question": "Summarize"
-    #             # })
+    #         summary = st.session_state.get("generated_summary", "[SUMMARY NOT GENERATED]")
+    #         input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
+    #         output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
+    #         input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
 
-                
-    #             status_text.text("Calculating costs...")
-    #             progress_bar.progress(75)
-                
-    #             # Estimate output tokens
-    #             output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
-                
-    #             # Calculate costs
-    #             input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
-                
-    #             progress_bar.progress(100)
-    #             status_text.text("Complete!")
-                
+    #         st.subheader("📈 Estimated Usage and Cost")
+    #         col_tokens, col_cost = st.columns(2)
+
+    #         with col_tokens:
+    #             st.metric("Input Tokens", f"{int(input_tokens):,}")
+    #             st.metric("Output Tokens", f"{int(output_tokens):,}")
+    #             st.metric("Total Tokens", f"{int(input_tokens + output_tokens):,}")
+
+
+    #         # Update session total
+    #         st.session_state.total_usage['input_tokens'] += int(input_tokens)
+    #         st.session_state.total_usage['output_tokens'] += int(output_tokens)
+
     #     except Exception as e:
-    #         st.error(f"Error during summarization: {str(e)}")
-    #         st.info("This might be due to:")
-    #         st.write("- API timeout or rate limits")
-    #         st.write("- Network connectivity issues")
-    #         st.write("- Streamlit Cloud resource limitations")
-    #         st.write("- Large input text causing memory issues")
-    #         st.stop()
-        
-    #     finally:
-    #         # Clean up progress indicators
-    #         progress_bar.empty()
-    #         status_text.empty()
-
-    #     st.subheader("Summarized Result:")
-    #     st.write(summary)    
-
-    #     # Display token usage and cost for current query
-    #     st.subheader("📈 Current Query Usage")
-    #     col_tokens, col_cost = st.columns(2)
-        
-    #     with col_tokens:
-    #         st.metric("Input Tokens", f"{int(input_tokens):,}")
-    #         st.metric("Output Tokens", f"{int(output_tokens):,}")
-    #         st.metric("Total Tokens", f"{int(input_tokens + output_tokens):,}")
-        
-    #     with col_cost:
-    #         st.metric("Input Cost", f"${input_cost:.6f}")
-    #         st.metric("Output Cost", f"${output_cost:.6f}")
-    #         st.metric("Total Cost", f"${total_cost:.6f}")
-        
-    #     # Update session state with token and cost tracking
-    #     st.session_state.total_usage['input_tokens'] += int(input_tokens)
-    #     st.session_state.total_usage['output_tokens'] += int(output_tokens)
-    #     st.session_state.total_usage['total_cost'] += total_cost
+    #         st.error(f"Cost estimation error: {str(e)}")
