@@ -42,7 +42,6 @@ raw = st.secrets["google"]["credentials"]
 service_account_info = json.loads(raw)
 
 
-
 # Create credentials
 credentials = Credentials.from_service_account_info(
     service_account_info,
@@ -177,49 +176,75 @@ with col2:
         prompt = ChatPromptTemplate.from_template(user_custom_prompt)
         st.success("Prompt is ready to feed into the Model!")
 
+from google import genai
+
+client = genai.Client()
 
 if case_selection and model_selection and user_custom_prompt:
     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
-
     full_input = case_details[case_selection] + "\n\n" + user_custom_prompt
 
-
-   
     rag_chain = (
-         {"context": semantic_chunk_retriever, "question": RunnablePassthrough() }
-         | prompt
-         | llm
-         | StrOutputParser()
+        {"context": semantic_chunk_retriever, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
     )
+
+    is_gemini = "Gemini" in model_selection
 
     # BUTTON 1: Summarize only
     if st.button("Summarize"):
         try:
             with st.spinner("Generating summary..."):
-                summary = rag_chain.invoke("Summarize")
-            st.subheader("Summarized Result:")
-            st.write(summary)
-            st.session_state.generated_summary = summary  # cache for later use
+                if is_gemini:
+                    # Accurate token count before generation
+
+                    #Input
+                    input_tokens = client.models.count_tokens(
+                        model="gemini-2.0-flash-001",  # Or dynamically choose model
+                        contents=full_input
+                    ).total_tokens
+
+                    #Summarized output
+                    response = client.models.generate_content(
+                        model="gemini-2.0-flash-001",
+                        contents=full_input
+                    )
+
+                    summary = response.candidates[0].content.parts[0].text
+                    usage = response.usage_metadata
+                    output_tokens = usage.candidates_token_count
+
+                else:
+                    summary = rag_chain.invoke("Summarize")
+                    input_tokens = count_tokens(full_input, "groq")
+                    output_tokens = count_tokens(summary, "groq")
+
+                st.session_state.generated_summary = summary
+                st.session_state.generated_input_tokens = input_tokens
+                st.session_state.generated_output_tokens = output_tokens
+
+                st.subheader("Summarized Result:")
+                st.write(summary)
+
         except Exception as e:
             st.error(f"Error during summarization: {str(e)}")
 
-    # BUTTON: Token Usage Only
+    # BUTTON 2: Token Usage Only
     if st.button("Estimate Tokens Usage"):
         try:
             summary = st.session_state.get("generated_summary", "[SUMMARY NOT GENERATED]")
-            
-            # Estimate input and output tokens
-            input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
-            output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
+            input_tokens = st.session_state.get("generated_input_tokens", 0)
+            output_tokens = st.session_state.get("generated_output_tokens", 0)
 
-            # Display token metrics
-            st.subheader("📊 Estimated Token Usage")
+            st.subheader("Estimated Token Usage")
             col_tokens = st.columns(3)
             col_tokens[0].metric("Input Tokens", f"{input_tokens:,}")
             col_tokens[1].metric("Output Tokens", f"{output_tokens:,}")
             col_tokens[2].metric("Total Tokens", f"{input_tokens + output_tokens:,}")
 
-            # Optional: Track in session if needed
+            # Track usage if needed
             st.session_state.total_usage['input_tokens'] += input_tokens
             st.session_state.total_usage['output_tokens'] += output_tokens
 
@@ -227,26 +252,53 @@ if case_selection and model_selection and user_custom_prompt:
             st.error(f"Token estimation error: {str(e)}")
 
 
-    # # BUTTON 2: Estimate cost only
-    # if st.button("Estimate Token Usage and Cost 💰"):
-    #     try:
-    #         summary = st.session_state.get("generated_summary", "[SUMMARY NOT GENERATED]")
-    #         input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
-    #         output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
-    #         input_cost, output_cost, total_cost = calculate_cost(input_tokens, output_tokens, model_selection)
 
-    #         st.subheader("📈 Estimated Usage and Cost")
-    #         col_tokens, col_cost = st.columns(2)
+# if case_selection and model_selection and user_custom_prompt:
+#     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
 
-    #         with col_tokens:
-    #             st.metric("Input Tokens", f"{int(input_tokens):,}")
-    #             st.metric("Output Tokens", f"{int(output_tokens):,}")
-    #             st.metric("Total Tokens", f"{int(input_tokens + output_tokens):,}")
+#     full_input = case_details[case_selection] + "\n\n" + user_custom_prompt
 
 
-    #         # Update session total
-    #         st.session_state.total_usage['input_tokens'] += int(input_tokens)
-    #         st.session_state.total_usage['output_tokens'] += int(output_tokens)
+   
+#     rag_chain = (
+#          {"context": semantic_chunk_retriever, "question": RunnablePassthrough() }
+#          | prompt
+#          | llm
+#          | StrOutputParser()
+#     )
 
-    #     except Exception as e:
-    #         st.error(f"Cost estimation error: {str(e)}")
+#     # BUTTON 1: Summarize only
+#     if st.button("Summarize"):
+#         try:
+#             with st.spinner("Generating summary..."):
+#                 summary = rag_chain.invoke("Summarize")
+#             st.subheader("Summarized Result:")
+#             st.write(summary)
+#             st.session_state.generated_summary = summary  # cache for later use
+#         except Exception as e:
+#             st.error(f"Error during summarization: {str(e)}")
+
+#     # BUTTON: Token Usage Only
+#     if st.button("Estimate Tokens Usage"):
+#         try:
+#             summary = st.session_state.get("generated_summary", "[SUMMARY NOT GENERATED]")
+            
+#             # Estimate input and output tokens
+#             input_tokens = count_tokens(full_input, "gemini" if "Gemini" in model_selection else "groq")
+#             output_tokens = count_tokens(summary, "gemini" if "Gemini" in model_selection else "groq")
+
+#             # Display token metrics
+#             st.subheader("Estimated Token Usage")
+#             col_tokens = st.columns(3)
+#             col_tokens[0].metric("Input Tokens", f"{input_tokens:,}")
+#             col_tokens[1].metric("Output Tokens", f"{output_tokens:,}")
+#             col_tokens[2].metric("Total Tokens", f"{input_tokens + output_tokens:,}")
+
+#             # Optional: Track in session if needed
+#             st.session_state.total_usage['input_tokens'] += input_tokens
+#             st.session_state.total_usage['output_tokens'] += output_tokens
+
+#         except Exception as e:
+#             st.error(f"Token estimation error: {str(e)}")
+
+
