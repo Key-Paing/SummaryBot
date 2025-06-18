@@ -29,6 +29,9 @@ from google.auth import default
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
 
+from langchain.callbacks import get_openai_callback
+import tiktoken
+
 
 # for Groq-Cloud
 from langchain_groq import ChatGroq
@@ -194,9 +197,50 @@ if case_selection and model_selection and user_custom_prompt:
          | StrOutputParser()
     )
 
+    def estimate_tokens(text: str, multiplier=1.3) -> int:
+        return int(len(text.split()) * multiplier)
+
+
     if st.button("Summarize"):
-        with st.spinner("Summarizing...."):
+        with st.spinner("Summarizing..."):
+            # Run the chain
             summary = rag_chain.invoke("Summarize")
 
-        st.subheader("Summarized Result:")
-        st.write(summary)    
+            # Retrieve context used by retriever (typically the first matched chunk)
+            context_docs = st.session_state.get(f"chunks_{case_selection}", [])
+            retrieved_context = "\n\n".join(doc.page_content for doc in context_docs)
+
+
+            # Combine context and prompt for input estimation
+            full_prompt = f"{retrieved_context}\n\n{user_custom_prompt}"
+
+            # Estimate tokens
+            input_tokens = estimate_tokens(full_prompt)
+            output_tokens = estimate_tokens(summary)
+            total_tokens = input_tokens + output_tokens
+
+            # Show result and estimates
+            st.subheader("Summarized Result:")
+            st.write(summary)
+
+            st.markdown("### 📊 Estimated Token Usage (Gemini - VertexAI)")
+            st.write(f"- Estimated Input Tokens: {input_tokens}")
+            st.write(f"- Estimated Output Tokens: {output_tokens}")
+            st.write(f"- Total Estimated Tokens: {total_tokens}")
+
+
+    # if st.button("Summarize"):
+    #     with st.spinner("Summarizing...."):
+
+    #     # Count tokens using LangChain callback manager
+    #         with get_openai_callback() as cb:
+    #             summary = rag_chain.invoke("Summarize")
+
+    #     st.subheader("Summarized Result:")
+    #     st.write(summary)
+
+    #     # Display token usage
+    #     st.markdown("### 📊 Token Usage")
+    #     st.write(f"- Prompt Tokens (Input): {cb.prompt_tokens}")
+    #     st.write(f"- Completion Tokens (Output): {cb.completion_tokens}")
+    #     st.write(f"- Total Tokens: {cb.total_tokens}")   
