@@ -29,8 +29,7 @@ from google.auth import default
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
 
-from langchain.callbacks import get_openai_callback
-import tiktoken
+
 
 
 # for Groq-Cloud
