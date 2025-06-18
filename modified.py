@@ -178,7 +178,7 @@ with col2:
 
 from google import genai
 
-client = genai.Client()
+client = genai.Client(api_key = service_account_info)
 
 if case_selection and model_selection and user_custom_prompt:
     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
