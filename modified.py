@@ -182,7 +182,7 @@ client = genai.Client(api_key = service_account_info)
 
 if case_selection and model_selection and user_custom_prompt:
     semantic_chunk_retriever = st.session_state.get(f"retriever_{case_selection}")
-    full_input = semantic_chunk_retriever + "\n\n" + user_custom_prompt
+    full_input = case_details[case_selection] + "\n\n" + user_custom_prompt
 
     rag_chain = (
         {"context": semantic_chunk_retriever, "question": RunnablePassthrough()}
